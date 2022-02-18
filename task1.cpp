@@ -5,8 +5,8 @@
 using namespace std;
 
 const int N = 25;
-const int stopWordsNumber = 11;
-const string stopWords[] = { "for", "the", "in", "on", "out", "of", "a", "an", "and", "by", "not" };
+const int stopWordsNumber = 12;
+const string stopWords[] = { "for", "the", "in", "on", "out", "of", "a", "an", "and", "by", "not", "s" };
 
 int main() {
     int arraySize = 100;
@@ -14,7 +14,7 @@ int main() {
     int* wordsNumber = new int[arraySize];
 
     ifstream file;
-    file.open("input.txt");
+    file.open("input11.txt");
 
     string currentLine;
     string currentWord;
