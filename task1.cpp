@@ -1,0 +1,196 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+const int N = 25;
+const int stopWordsNumber = 11;
+const string stopWords[] = { "for", "the", "in", "on", "out", "of", "a", "an", "and", "by", "not" };
+
+int main() {
+    int arraySize = 100;
+    string* wordsDict = new string[arraySize];
+    int* wordsNumber = new int[arraySize];
+
+    ifstream file;
+    file.open("input.txt");
+
+    string currentLine;
+    string currentWord;
+    int wordSize;
+    int i;
+
+    int lineNumber = 0;
+    int wordNumber = 0;
+
+READ_FILE:
+    if (file.eof()) goto END_READING;
+    getline(file, currentLine);
+    lineNumber++;
+    i = 0;
+
+READ_LINE:
+
+    if (wordNumber >= arraySize) {
+        string* oldDict = wordsDict;
+        int* oldNumbers = wordsNumber;
+
+        arraySize *= 2;
+        wordsDict = new string[arraySize];
+        wordsNumber = new int[arraySize];
+
+        int iterator = 0;
+    COPY_ARRAY:
+        wordsDict[iterator] = oldDict[iterator];
+        wordsNumber[iterator] = oldNumbers[iterator];
+        iterator++;
+
+        if (iterator < wordNumber) {
+            goto COPY_ARRAY;
+        }
+        delete[] oldDict;
+        delete[] oldNumbers;
+    }
+
+    currentWord = "";
+    wordSize = 0;
+
+READ_WORD:
+    if (currentLine[i] == '\0') goto WRITE_LAST;
+    if ('A' <= currentLine[i] && currentLine[i] <= 'Z')
+    {
+        currentWord = currentWord + (char)(currentLine[i] + 32);
+        i++;
+        wordSize++;
+        goto READ_WORD;
+    }
+    else if ('a' <= currentLine[i] && currentLine[i] <= 'z')
+    {
+        currentWord = currentWord + currentLine[i];
+        i++;
+        wordSize++;
+        goto READ_WORD;
+    }
+    else
+    {
+        if (wordSize != 0)
+        {
+            //cout << currentWord << ' ';
+            int j = 0;
+        CHECK_WORD:
+            if (wordsDict[j] == currentWord)
+            {
+                i++;
+                wordsNumber[j]++;
+                goto READ_LINE;
+            }
+            j++;
+            if (j <= wordNumber) goto CHECK_WORD;
+
+            int k = 0;
+        CHECK_STOP1:
+            if (k < stopWordsNumber) {
+                if (stopWords[k] == currentWord) goto SKIP1;
+                k++;
+                goto CHECK_STOP1;
+            }
+
+            wordsDict[wordNumber] = currentWord;
+            wordsNumber[wordNumber] = 1;
+            wordNumber++;
+        SKIP1:
+            i++;
+            goto READ_LINE;
+        }
+        else
+        {
+            if (currentLine[i] == '\0') goto READ_FILE;
+            i++;
+            goto READ_LINE;
+        }
+
+    }
+
+WRITE_LAST:
+    if (wordSize != 0)
+    {
+        //cout << currentWord << ' ';
+        int j = 0;
+    CHECK_WORD1:
+        if (wordsDict[j] == currentWord)
+        {
+            i++;
+            wordsNumber[j]++;
+            goto READ_FILE;
+        }
+        j++;
+        if (j <= wordNumber) goto CHECK_WORD1;
+
+        int k = 0;
+    CHECK_STOP2:
+        if (k < stopWordsNumber) {
+            if (stopWords[k] == currentWord) goto SKIP2;
+            k++;
+            goto CHECK_STOP2;
+        }
+
+        wordsDict[wordNumber] = currentWord;
+        wordsNumber[wordNumber] = 1;
+        wordNumber++;
+    SKIP2:
+        i++;
+        goto READ_FILE;
+    }
+    else
+    {
+        goto READ_FILE;
+    }
+
+
+END_READING:
+    file.close();
+    string temp1;
+    int temp2;
+    i = 0;
+    int j = 0;
+
+    int n = 0;
+OUTER_SORT:
+    if (i >= wordNumber) goto END_OUTER;
+    j = 0;
+INNER_SORT:
+    if (j >= wordNumber) goto END_INNER;
+CHECK_NEXT:
+    if (wordsNumber[j] >= wordsNumber[j + 1]) goto NO_SWAP;
+    
+    temp1 = wordsDict[j];
+    temp2 = wordsNumber[j];
+
+    wordsDict[j] = wordsDict[j + 1];
+    wordsDict[j + 1] = temp1;
+
+    wordsNumber[j] = wordsNumber[j + 1];
+    wordsNumber[j + 1] = temp2;
+
+NO_SWAP:
+    j++;
+    n = 0;
+    goto INNER_SORT;
+END_INNER:
+    i++;
+    goto OUTER_SORT;
+END_OUTER:
+    int outputCounter = 0;
+    ofstream outputFile;
+    outputFile.open("output1.txt");
+OUTPUT_WORDS:
+    if (outputCounter < wordNumber && outputCounter < N) {
+        outputFile << wordsDict[outputCounter] << " - " << wordsNumber[outputCounter] << endl;
+        outputCounter++;
+        goto OUTPUT_WORDS;
+    }
+    outputFile.close();
+    return 0;
+
+}
